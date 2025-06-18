@@ -1,0 +1,57 @@
+openapi: 3.0.3
+info:
+  title: IntA Inventory API
+  version: 1.0.0
+  description: API for managing inventory items in the IntA system.
+paths:
+  /inventory:
+    get:
+      tags:
+        - Inventory
+      summary: Get all inventory items
+      description: Retrieve a list of all inventory items.
+      operationId: getInventory
+      responses:
+        '200':
+          description: A single inventory item
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+  /blabla_endpoint:
+    get:
+      tags:
+        - Inventory
+      summary: Get all inventory items
+      description: Retrieve a list of all inventory items.
+      operationId: getInventoryBla
+      responses:
+        '200':
+          description: A single inventory item
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+components:
+  schemas:
+    Item:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the inventory item
+        description:
+          type: string
+          description: A detailed description of the inventory item
+        price:
+          type: number
+          format: float
+          description: The price of the inventory item
+        in_stock:
+          type: boolean
+          description: Whether the inventory item is in stock or not
+      required:
+        - name
+        - description
+        - price
+        - in_stock

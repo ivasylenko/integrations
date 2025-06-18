@@ -1,0 +1,53 @@
+from __future__ import annotations
+from fastapi import FastAPI
+
+
+{{imports}}
+
+
+app = FastAPI(
+    {% if info %}
+    {% for key,value in info.items() %}
+    {{ key }} = "{{ value }}",
+    {% endfor %}
+    {% endif %}
+    )
+
+
+class AppController:
+
+    {% for operation in operations %}
+    def {{operation.function_name}}(self, {{operation.snake_case_arguments}}) -> {{operation.response}}:
+        """This method should be implemented by the subclass to return an Item."""
+        raise NotImplementedError("This method should be implemented by the subclass.")
+    {% endfor %}
+
+
+class IntegrationApp:
+
+    def __init__(self, controller: AppController):
+        self.controller = controller
+        self.setup_routes()
+
+    {% for operation in operations %}
+    async def {{operation.function_name}}(self, {{operation.snake_case_arguments}}) -> {{operation.response}}:
+        {%- if operation.summary %}
+        """
+        {{ operation.summary }}
+
+        """
+        {%- endif %}
+        return self.controller.{{operation.function_name}}({{operation.snake_case_arguments}})
+    {% endfor %}
+
+    def setup_routes(self):
+        """Set up the API routes for the integration."""
+
+        {% for operation in operations %}
+        app.add_api_route(
+            "{{operation.path}}",
+            self.{{operation.function_name}},
+            response_model={{operation.response}},
+            methods=["{{operation.type}}"]
+        )
+        {% endfor %}

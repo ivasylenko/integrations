@@ -1,13 +1,12 @@
 
 
-from centra_integrations.inventories import InventoriesControl
-from centra_integrations.app import IntegrationApp, app
-from centra_contracts import Item
+from centra_integrations import AppController, IntegrationApp, app
+from centra_integrations.models import Item
 
 
-class IntAInventory(InventoriesControl):
+class IntegrationController(AppController):
 
-    def get_all(self) -> Item:
+    def get_inventory_bla(self) -> Item:
         print('we going to call super API and come back to you')
         return Item(
             name="IntA",
@@ -16,4 +15,4 @@ class IntAInventory(InventoriesControl):
             in_stock=True
         )
 
-IntegrationApp(IntAInventory())
+IntegrationApp(IntegrationController())
