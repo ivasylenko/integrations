@@ -1,6 +1,6 @@
 
 
-from centra_integrations import AppController, IntegrationApp, app
+from centra_integrations import AppController, IntegrationApp
 from centra_integrations.models import Item
 
 
@@ -15,4 +15,4 @@ class IntegrationController(AppController):
             in_stock=True
         )
 
-IntegrationApp(IntegrationController())
+IntegrationApp().set_controller(IntegrationController()).setup_routes().run()

@@ -1,33 +1,38 @@
 from __future__ import annotations
-from fastapi import FastAPI
-
-
+from abc import ABC, abstractmethod
+from fastapi import FastAPI, HTTPException
+import uvicorn
 {{imports}}
 
 
-app = FastAPI(
-    {% if info %}
-    {% for key,value in info.items() %}
-    {{ key }} = "{{ value }}",
-    {% endfor %}
-    {% endif %}
-    )
 
-
-class AppController:
+class AppController(ABC):
 
     {% for operation in operations %}
     def {{operation.function_name}}(self, {{operation.snake_case_arguments}}) -> {{operation.response}}:
-        """This method should be implemented by the subclass to return an Item."""
-        raise NotImplementedError("This method should be implemented by the subclass.")
+        """This method should be implemented by the subclass."""
+        raise HTTPException(status_code=404, detail="Not implemented")
     {% endfor %}
 
 
 class IntegrationApp:
 
-    def __init__(self, controller: AppController):
+    def __init__(self):
+        self.app = FastAPI(
+            {% if info %}
+            {% for key,value in info.items() %}
+            {{ key }} = "{{ value }}",
+            {% endfor %}
+            {% endif %}
+            )
+
+    def set_controller(self, controller: AppController) -> IntegrationApp:
+        """Set the controller for the application."""
         self.controller = controller
-        self.setup_routes()
+        return self
+
+    def run(self):
+        uvicorn.run(self.app)
 
     {% for operation in operations %}
     async def {{operation.function_name}}(self, {{operation.snake_case_arguments}}) -> {{operation.response}}:
@@ -40,14 +45,16 @@ class IntegrationApp:
         return self.controller.{{operation.function_name}}({{operation.snake_case_arguments}})
     {% endfor %}
 
-    def setup_routes(self):
+    def setup_routes(self) -> IntegrationApp:
         """Set up the API routes for the integration."""
 
         {% for operation in operations %}
-        app.add_api_route(
+        self.app.add_api_route(
             "{{operation.path}}",
             self.{{operation.function_name}},
             response_model={{operation.response}},
             methods=["{{operation.type}}"]
         )
         {% endfor %}
+
+        return self
